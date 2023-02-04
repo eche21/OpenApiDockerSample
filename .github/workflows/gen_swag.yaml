@@ -1,0 +1,30 @@
+name: generate swagger file
+
+on:
+  push:
+    branches: [main]
+env:
+  IMAGE_NAME: test
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build swagger image
+      run: docker build -t ${{ env.IMAGE_NAME }}:swagger-${{ github.ref_name }} . 
+
+    - name: docker images
+      run: docker image ls 
+    - name: create output folder
+      run: mkdir output                
+    - name: Create swaggercontainer
+      run: |
+           docker create --name swaggercontainer ${{ env.IMAGE_NAME }}:swagger-${{ github.ref_name }} 
+           docker cp swaggercontainer:/app ./output
+           docker stop swaggercontainer
+           docker rm swaggercontainer 
+    - name: list content of output
+      run: ls ./output/app       
